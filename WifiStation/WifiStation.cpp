@@ -4,7 +4,6 @@
              A class that makes it easy to connect to WiFi using the ESP-IDF.
 */
 
-#pragma once
 #include "WifiStation.hpp"
 
 #include <cstring> 
@@ -219,16 +218,15 @@ void WifiStation::wifi_event_handler(void* handler_arg, esp_event_base_t event_b
             // Note: We want the same "auto-reconnect" behavioure when starting a connection.
             //       This is so it can have some attempts at connecting.
             if(self->m_config.auto_reconnect || self->m_status == wifi_station_status::STARTING_CONNECTION){
-                if(self->m_connection_attempts > self->m_config.max_con_failures){
+                if(
+                    self->m_config.max_con_failures != -1 &&
+                    self->m_connection_attempts > self->m_config.max_con_failures
+                ){
                     ESP_LOGW(self->m_log_tag, "Couldnt connect to wifi: Max connection failures reached");
 
                     self->m_status = wifi_station_status::DISCONNECTED;
                     xEventGroupSetBits(self->m_event_group, WIFI_EVENT_GRP_BIT_FAILED_TO_CONNECT);
                     return;
-                }
-
-                if(self->m_config.max_con_failures < 0 && self->m_connection_attempts > 20){
-                    // Here i could put it into deep sleep and try to reconnect every 10 minutes to save power
                 }
 
                 if(self->m_status != wifi_station_status::STARTING_CONNECTION){
@@ -262,6 +260,7 @@ void WifiStation::ip_event_handler(void* arg, esp_event_base_t event_base, int32
     if (event_id == IP_EVENT_STA_GOT_IP){ // IP_EVENT_STA_GOT_IP -> when the router has given the station (esp32) an ip adress
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         
+        self->m_ip_adress = event->ip_info.ip; 
         ESP_LOGI(self->m_log_tag, "Gotten a IP: " IPSTR, IP2STR(&event->ip_info.ip));
 
         xEventGroupSetBits(self->m_event_group, WIFI_EVENT_GRP_BIT_CONNECTED);

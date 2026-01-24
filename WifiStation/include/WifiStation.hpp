@@ -34,6 +34,16 @@ public:
     const WifiStationConfig get_config(){ return m_config; }
     /// @brief Current status.
     wifi_station_status get_status() { return m_status; }
+    /// @brief The ipv4 adress. 
+    esp_ip4_addr_t get_ip_adress() { return m_ip_adress; }
+
+    /// @brief The ipv4 adress but converted into a string.
+    std::string get_ip_adress_str() { 
+        char buffer[32];
+        esp_ip4addr_ntoa(&m_ip_adress, buffer, sizeof(buffer));
+        return std::string(buffer, sizeof(buffer));
+    }
+    
 
     /* METHODS */
     /// @brief Initalizes all necesary things for making a wifi connection.
@@ -67,6 +77,7 @@ private:
     const char* m_log_tag = "WifiStation";
     const WifiStationConfig m_config;
     wifi_station_status m_status = wifi_station_status::DISCONNECTED;
+    esp_ip4_addr m_ip_adress;
 
     int m_connection_attempts = 0;  
     bool m_is_initialized = false;
