@@ -137,7 +137,12 @@ bool WifiStation::start_connection(){
     ESP_ERROR_CHECK(esp_wifi_start()); 
     ESP_LOGI(m_log_tag, "Starting wifi driver...");
 
+    // Set max TX power
+    ESP_ERROR_CHECK(esp_wifi_set_max_tx_power(m_config.max_tx_power));
+
+
     // Note: Beyond this point the registerd handlers can be triggerd...
+
 
     // This will block the code until the wifi has either connected or failed to connect
     EventBits_t bits = xEventGroupWaitBits(
